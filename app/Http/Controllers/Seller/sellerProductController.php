@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\ApiController;
 use Illuminate\Http\Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use App\user;
 use App\seller;
 use App\Product;
@@ -34,7 +35,7 @@ class sellerProductController extends ApiController
         $data = $request->all();
 
         $data['status'] = product::UNAVAILABLE_PRODUCT;
-        $data['image']  = '1.jpeg';
+        $data['image']  = $request->image->store('');
         $data['seller_id']  =   $seller->id;
 
         $product = product::create($data);
@@ -66,6 +67,10 @@ class sellerProductController extends ApiController
                 return $this->errorResponse('Active Product must have at least one category',409);
             }
         }
+        if($request->hasFile('image')){
+            Storage::Delete($prodect->image);
+            $request->image = $product->image->store('');
+        }
         if($product->isClean()){
             return $this-errorResponse('you need to specify a differnet value to update', 422);
         }
@@ -84,6 +89,7 @@ class sellerProductController extends ApiController
     {
         $this->checkSeller($seller,$product);
         $product->delete();
+        Storage::Delete($product->image);
         return $this->showOne($product);
     }
     protected function checkSeller(Seller $seller, Product $product)

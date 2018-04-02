@@ -40,7 +40,7 @@ class UsersController extends ApiController
 
         $user = User::create($data);
 
-        return $his->showOne($user,201);
+        return $this->showOne($user,201);
 
 
     }
